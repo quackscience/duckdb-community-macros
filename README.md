@@ -1,118 +1,49 @@
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-![GitHub stars](https://img.shields.io/github/stars/nelsontky/gh-pages-url-shortener?style=social)
+# URL Shortener & Proxy Service
 
-# GitHub Pages URL Shortener
+A simple URL shortener and proxy service using Github Pages and Cloudflare Workers. All URLs are stored as files in the `/links` directory.
 
-A simple yet powerful URL shortener that uses GitHub Pages, GitHub Issues, and repository files for URL redirection. No extra hosting or database needed!
+## How it Works
 
-## How It Works
+1. Create a file in the `/links` directory
+2. File name becomes your URL path
+3. File content is the target URL
+4. Access via `/r/your-path`
 
-This URL shortener supports two methods of creating short URLs:
+## Example
 
-1. **Issue-based links** (`/i/` routes)
-   - Uses GitHub Issues to store URLs
-   - Great for automation and quick additions
-   - URLs are stored in issue titles
+File: `/links/duckdb`
 
-2. **File-based links** (`/r/` routes)
-   - Uses files in the `/links` directory
-   - Perfect for memorable, custom-named shortcuts
-   - URLs are stored in file contents
+```
+https://duckdb.org
+```
 
-## Setting Up Your Own Instance
+Now `/r/duckdb` will proxy content from Google.
+
+## Adding New URLs
 
 1. Fork this repository
-2. Enable GitHub Pages in your repository settings:
-   - Go to Settings → Pages
-   - Set Source to "GitHub Actions"
-   - Your site will be available at `https://[username].github.io/[repo-name]/`
+2. Create a new file in the `/links` directory
+3. Name it what you want your URL path to be
+4. Put the target URL as the only content
+5. Submit a Pull Request
 
-3. Update the configuration in `index.html`:
-   ```javascript
-   const CONFIG = {
-     GITHUB_ISSUES_LINK: "https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/issues/",
-     GITHUB_FILES_LINK: "https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/contents/links/",
-     GITHUB_REPO: "https://github.com/YOUR_USERNAME/YOUR_REPO"
-   };
-   ```
+## File Requirements
 
-## Creating Short URLs
+- Filenames: Use only lowercase letters, numbers, and hyphens
+- Content: Single line with the target URL
+- URLs must be valid and publicly accessible
 
-### Method 1: Issue-Based Links (`/i/`)
+## How URLs are Served
 
-1. Create a new issue in your repository
-2. Set the issue title to your destination URL
-   - Example: `https://www.google.com`
-3. Note the issue number (e.g., `123`)
-4. Your short URL will be: `https://[username].github.io/[repo-name]/i/123`
-
-**Pros of Issue-Based Links:**
-- Quick to create via GitHub UI or API
-- Easy to automate with GitHub Actions
-- Built-in history and modification tracking
-- Can add notes in issue comments
-
-### Method 2: File-Based Links (`/r/`)
-
-1. Navigate to the `/links` directory in your repository
-2. Create a new file with your desired short name
-   - Example: Create file `google`
-3. Add your destination URL as the only content
-   - Example: `https://www.google.com`
-4. Your short URL will be: `https://[username].github.io/[repo-name]/r/google`
-
-**Pros of File-Based Links:**
-- Custom, memorable URLs
-- Easy to manage with git
-- Can be organized in bulk
-- Great for permanent links
-
-## Examples
-
-```
-# Issue-based links
-/i/123 → Issue #123's title URL
-/i/456 → Issue #456's title URL
-
-# File-based links
-/r/google → Contents of /links/google file
-/r/github → Contents of /links/github file
-
-# Invalid routes redirect to repository
-/anything-else → GitHub repository
-```
-
-## Tips and Best Practices
-
-### For Issue-Based Links:
-1. Use clear issue labels to organize your URLs
-2. Add descriptions in issue comments for context
-3. Close issues for deprecated URLs
-4. Use issue numbers sequentially for easy tracking
-
-### For File-Based Links:
-1. Use lowercase filenames for consistency
-2. Avoid special characters in filenames
-3. Organize related links with similar names
-4. Keep one URL per file
-
-## Technical Details
-
-- The shortener uses client-side JavaScript to handle redirects
-- GitHub's API is used to fetch both issues and files
-- All redirects are handled through GitHub Pages
-- No server-side code or database required
-
-## Limitations
-
-#### GitHub Pages Update Time:
-   - File-based links may take a few minutes to update
-   - Issue-based links are immediate
-
-#### URL Requirements:
-   - Must be valid URLs starting with http:// or https://
-   - Cannot redirect to the shortener domain itself
+Instead of redirecting, this service proxies the content directly. This means:
+- Content is served from our domain
+- CORS headers are properly handled
+- Great for WASM and other clients that need direct access
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+PRs are welcome! Please follow the PR template when adding new URLs.
+
+## License
+
+MIT
