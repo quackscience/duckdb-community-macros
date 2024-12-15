@@ -2,77 +2,92 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Redirecting...</title>
+    <title>URL Redirector</title>
     <script>
       /**
-       * Configuration goes here
+       * Configuration
        */
-      // Format: https://api.github.com/repos/{owner}/{repo}/issues/
-      var GITHUB_ISSUES_LINK =
-        "https://api.github.com/repos/nelsontky/gh-pages-url-shortener-db/issues/";
-      var PATH_SEGMENTS_TO_SKIP = 0;
+      const CONFIG = {
+        GITHUB_ISSUES_LINK: "https://api.github.com/repos/OWNER/REPO/issues/",
+        GITHUB_FILES_LINK: "https://api.github.com/repos/OWNER/REPO/contents/links/",
+        GITHUB_REPO: "https://github.com/OWNER/REPO",
+        PATH_SEGMENTS_TO_SKIP: 0
+      };
 
-      /**
-       * DO NOT TOUCH ANYTHING BELOW THIS COMMENT UNLESS YOU KNOW WHAT YOU ARE DOING
-       */
       function isUrl(url) {
-        // Regex from https://stackoverflow.com/a/3809435, with a modification to allow for TLDs of up to 24 characters
-        return /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,24}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)+$/.test(
-          url
-        );
+        return /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,24}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)+$/.test(url);
       }
 
-      function redirect() {
-        var location = window.location;
-        var issueNumber = location.pathname.split("/")[
-          PATH_SEGMENTS_TO_SKIP + 1
-        ];
-        var homepage =
-          location.protocol +
-          "//" +
-          location.hostname +
-          (location.port ? ":" + location.port : "") +
-          "/" +
-          location.pathname.split("/")[PATH_SEGMENTS_TO_SKIP];
+      async function tryIssueRedirect(issueNumber) {
+        try {
+          const response = await fetch(CONFIG.GITHUB_ISSUES_LINK + issueNumber);
+          const data = await response.json();
+          return data.title || null;
+        } catch (e) {
+          console.error("Issue redirect failed:", e);
+          return null;
+        }
+      }
 
-        var xhr = new XMLHttpRequest();
+      async function tryFileRedirect(path) {
+        try {
+          const response = await fetch(CONFIG.GITHUB_FILES_LINK + path);
+          const data = await response.json();
+          return atob(data.content.trim()) || null;
+        } catch (e) {
+          console.error("File redirect failed:", e);
+          return null;
+        }
+      }
 
-        xhr.onload = function () {
-          try {
-            var payload = JSON.parse(xhr.response);
-            var message = payload.message;
-            var title = payload.title;
+      async function redirect() {
+        const location = window.location;
+        const pathParts = location.pathname.split("/").filter(part => part);
+        
+        // Default to homepage if no path
+        if (pathParts.length === 0) {
+          location.replace(CONFIG.GITHUB_REPO);
+          return;
+        }
 
-            // Workaround IE 11 lack of support for new URL()
-            var url = document.createElement("a");
-            url.setAttribute("href", title);
+        let url = null;
+        const prefix = pathParts[0];
+        const identifier = pathParts[1];
 
-            // Invalid URLs includes invalid issue numbers, issue titles that are not URLs, and recursive destination URLs
-            var isInvalidUrl =
-              message === "Not Found" ||
-              !title ||
-              !isUrl(title) ||
-              url.hostname === location.hostname;
-
-            if (isInvalidUrl) {
-              location.replace(homepage);
-            } else {
-              location.replace(title);
+        // Only proceed if we have both prefix and identifier
+        if (prefix && identifier) {
+          if (prefix === 'r') {
+            // File-based redirect for /r/ paths
+            url = await tryFileRedirect(identifier);
+          } 
+          else if (prefix === 'i') {
+            // Issue-based redirect for /i/ paths
+            if (/^\d+$/.test(identifier)) {
+              url = await tryIssueRedirect(identifier);
             }
-          } catch (e) {
-            location.replace(homepage);
           }
-        };
+        }
 
-        xhr.onerror = function () {
-          location.replace(homepage);
-        };
-        xhr.open("GET", GITHUB_ISSUES_LINK + issueNumber);
-        xhr.send();
+        // If we found a valid URL, try to redirect
+        if (url && isUrl(url)) {
+          const targetUrl = document.createElement("a");
+          targetUrl.setAttribute("href", url);
+          
+          // Prevent recursive redirects
+          if (targetUrl.hostname !== location.hostname) {
+            location.replace(url);
+            return;
+          }
+        }
+
+        // Fallback to repository page for invalid routes
+        location.replace(CONFIG.GITHUB_REPO);
       }
 
       redirect();
     </script>
   </head>
-  <body></body>
+  <body>
+    <noscript>JavaScript is required for redirection.</noscript>
+  </body>
 </html>
