@@ -1,86 +1,118 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![GitHub stars](https://img.shields.io/github/stars/nelsontky/gh-pages-url-shortener?style=social)
 
-# 🔗 GitHub Pages URL Shortener
+# GitHub Pages URL Shortener
 
-This is a minimal URL shortener that can be entirely hosted on GitHub pages. It
-does not need the maintenance of any servers or databases and can be hosted
-entirely on GitHub for free!
+A simple yet powerful URL shortener that uses GitHub Pages, GitHub Issues, and repository files for URL redirection. No extra hosting or database needed!
 
-[Yay! We got to the top of HN!](https://news.ycombinator.com/item?id=25110879)
+## How It Works
 
-<img src="https://i.imgur.com/ZfD7XGt.png" alt="Top of HN" width="240px">
+This URL shortener supports two methods of creating short URLs:
 
-And on GitHub trending!
+1. **Issue-based links** (`/i/` routes)
+   - Uses GitHub Issues to store URLs
+   - Great for automation and quick additions
+   - URLs are stored in issue titles
 
-<img src="https://i.imgur.com/OkYCSOx.png" alt="GitHub Trending" width="240px">
+2. **File-based links** (`/r/` routes)
+   - Uses files in the `/links` directory
+   - Perfect for memorable, custom-named shortcuts
+   - URLs are stored in file contents
 
-## 👨‍🏫 Demo
+## Setting Up Your Own Instance
 
-1. [ccb.wtf/1](https://ccb.wtf/1) should link to this repo.
+1. Fork this repository
+2. Enable GitHub Pages in your repository settings:
+   - Go to Settings → Pages
+   - Set Source to "GitHub Actions"
+   - Your site will be available at `https://[username].github.io/[repo-name]/`
 
-1. To add a new short link, add an issue with the title being the link you want
-   to shorten (including the `http(s)://`) to
-   [https://github.com/nelsontky/gh-pages-url-shortener-db/issues](https://github.com/nelsontky/gh-pages-url-shortener-db/issues).
+3. Update the configuration in `index.html`:
+   ```javascript
+   const CONFIG = {
+     GITHUB_ISSUES_LINK: "https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/issues/",
+     GITHUB_FILES_LINK: "https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/contents/links/",
+     GITHUB_REPO: "https://github.com/YOUR_USERNAME/YOUR_REPO"
+   };
+   ```
 
-1. The newly created short url can be accessed via `ccb.wtf/{issue_number}`
+## Creating Short URLs
 
-## ☕️ Features
+### Method 1: Issue-Based Links (`/i/`)
 
-1. Unlike many URL shorteners, this one ~~does not need a database~~ uses a
-   "database" in the form of GitHub issues and can be entirely hosted on GitHub
-   pages.
+1. Create a new issue in your repository
+2. Set the issue title to your destination URL
+   - Example: `https://www.google.com`
+3. Note the issue number (e.g., `123`)
+4. Your short URL will be: `https://[username].github.io/[repo-name]/i/123`
 
-1. There is no need for the pound symbol - short URLs look clean like this:
-   `ccb.wtf/1` instead of looking like this: `ccb.wtf/#1`.
+**Pros of Issue-Based Links:**
+- Quick to create via GitHub UI or API
+- Easy to automate with GitHub Actions
+- Built-in history and modification tracking
+- Can add notes in issue comments
 
-## 💡 How does this work?
+### Method 2: File-Based Links (`/r/`)
 
-_Thanks to @kidGodzilla for the pretty neat explanation
-[here](https://github.com/nelsontky/gh-pages-url-shortener/issues/5#issuecomment-728040879)._
+1. Navigate to the `/links` directory in your repository
+2. Create a new file with your desired short name
+   - Example: Create file `google`
+3. Add your destination URL as the only content
+   - Example: `https://www.google.com`
+4. Your short URL will be: `https://[username].github.io/[repo-name]/r/google`
 
-> 1. 404.html handles all requests
-> 1. Small javascript snippet fetches a JSON representation of the GitHub issue
->    via the JSON API, and redirects to the issue title, as a URL.
-> 1. Profit?
+**Pros of File-Based Links:**
+- Custom, memorable URLs
+- Easy to manage with git
+- Can be organized in bulk
+- Great for permanent links
 
-## 😎 This is so cool! How can I use this with my own domain?!
+## Examples
 
-_Disclaimer: This method of creating a URL shortener is hacky and not meant to
-be reliable. Do proceed at your own risk!_
+```
+# Issue-based links
+/i/123 → Issue #123's title URL
+/i/456 → Issue #456's title URL
 
-1. Fork the repo before cloning your fork.
-1. Set up GitHub pages for your forked repo.
-   1. In your forked repo, **click the Settings tab** and scroll down to the
-      GitHub Pages section.
-   1. Then select the **main branch** source and click on the **Save** button.
-   1. <img src="https://i.imgur.com/kjinFX9.png" alt="How to create GitHub page" height="176px">
-1. If you are using your own domain:
-   1. [Set your domain up for GitHub pages.](https://docs.github.com/en/free-pro-team@latest/github/working-with-github-pages/managing-a-custom-domain-for-your-github-pages-site#configuring-an-apex-domain)
-   1. Change the URL in `CNAME` file to your domain.
-1. If you are using GitHub page's default domain i.e. Something like
-   `https://<username>.github.io/<repo-name>/`
-   1. Delete the `CNAME` file.
-   1. Change `var PATH_SEGMENTS_TO_SKIP = 0;` at the top of `404.html` to
-      `var PATH_SEGMENTS_TO_SKIP = 1;`.
-      1. This is as GitHub domains have an additional path segment (the repo
-         name) after the host name.
-1. Create a new repo as a database. (Or you could use your forked repo)
-   1. Update `var GITHUB_ISSUES_LINK = "<your-github-issues-link>";` at the top
-      of `404.html` accordingly afterwards.
-      1. Format for `GITHUB_ISSUES_LINK`:
-         `https://api.github.com/repos/{owner}/{repo}/issues/`
-      1. Remember the trailing `/`!
-1. Push your changes to your forked repo, and your low cost and cool as heck URL
-   shortener will be ready for use!
+# File-based links
+/r/google → Contents of /links/google file
+/r/github → Contents of /links/github file
 
-## 🍴 Featured forks
+# Invalid routes redirect to repository
+/anything-else → GitHub repository
+```
 
-To feature your fork here, edit this section and open a PR!
+## Tips and Best Practices
 
-- [eexit.github.io/s](https://github.com/eexit/s) - Created a bash script that
-  allows for shortening of URLs straight on the command line! Check out his
-  script
-  [here](https://github.com/nelsontky/gh-pages-url-shortener/issues/49#issue-745134937).
-- [gh-short-url](https://github.com/mayandev/gh-short-url) - A npm command line
-  tool that uses GitHub pages to convert short URLs.
+### For Issue-Based Links:
+1. Use clear issue labels to organize your URLs
+2. Add descriptions in issue comments for context
+3. Close issues for deprecated URLs
+4. Use issue numbers sequentially for easy tracking
+
+### For File-Based Links:
+1. Use lowercase filenames for consistency
+2. Avoid special characters in filenames
+3. Organize related links with similar names
+4. Keep one URL per file
+
+## Technical Details
+
+- The shortener uses client-side JavaScript to handle redirects
+- GitHub's API is used to fetch both issues and files
+- All redirects are handled through GitHub Pages
+- No server-side code or database required
+
+## Limitations
+
+#### GitHub Pages Update Time:
+   - File-based links may take a few minutes to update
+   - Issue-based links are immediate
+
+#### URL Requirements:
+   - Must be valid URLs starting with http:// or https://
+   - Cannot redirect to the shortener domain itself
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
