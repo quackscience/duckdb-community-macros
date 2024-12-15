@@ -1,49 +1,22 @@
-# URL Shortener & Proxy Service
+<img src="https://github.com/user-attachments/assets/46a5c546-7e9b-42c7-87f4-bc8defe674e0" width=250 />
 
-A simple URL shortener and proxy service using Github Pages and Cloudflare Workers. All URLs are stored as files in the `/links` directory.
+# DuckDB Community Macro Repository
 
-## How it Works
+This repository hosts anre serves DuckDB SQL Community Macros as a helper for the [webmacro extension](https://github.com/quackscience/duckdb-extension-webmacro)
+
+## Add a Macro Extension
 
 1. Create a file in the `/links` directory
-2. File name becomes your URL path
-3. File content is the target URL
-4. Access via `/r/your-path`
+  * File name becomes your URL path
+  * File content is the target URL
+4. Access via `quacks.cc/r/your-path`
 
 ## Example
 
-File: `/links/duckdb`
+| File Name      | File Content |
+|---             |---                    |
+| `/links/search_posts` | `https://gist.githubusercontent.com/lmangani/518215a68e674ac662537d518799b893/raw/5f305480fdd7468f4ecda3686011bab8e8e711bf/bsky.sql` |
 
-```
-https://duckdb.org
-```
+<br>
 
-Now `/r/duckdb` will proxy content from Google.
-
-## Adding New URLs
-
-1. Fork this repository
-2. Create a new file in the `/links` directory
-3. Name it what you want your URL path to be
-4. Put the target URL as the only content
-5. Submit a Pull Request
-
-## File Requirements
-
-- Filenames: Use only lowercase letters, numbers, and hyphens
-- Content: Single line with the target URL
-- URLs must be valid and publicly accessible
-
-## How URLs are Served
-
-Instead of redirecting, this service proxies the content directly. This means:
-- Content is served from our domain
-- CORS headers are properly handled
-- Great for WASM and other clients that need direct access
-
-## Contributing
-
-PRs are welcome! Please follow the PR template when adding new URLs.
-
-## License
-
-MIT
+![webmacro_example](https://github.com/user-attachments/assets/ef287d25-6396-4ee1-9d69-27e95ad56ef1)
